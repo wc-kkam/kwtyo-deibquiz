@@ -24,8 +24,11 @@ function shuffleArray(array) {
     return array;
 }
 
-function loadQuestions() {
-    $.getJSON('assets/js/questions.json', function(data) {
+// Load questions with language support
+function loadQuestions(lang = 'en') {
+    let file = 'assets/js/questions.json';
+    if (lang === 'ja') file = 'assets/js/questions_ja.json';
+    $.getJSON(file, function(data) {
         // Shuffle and take 10 questions (or all if less than 10)
         const shuffled = shuffleArray(data.slice());
         questions = shuffled.slice(0, 10);
@@ -37,8 +40,9 @@ function renderQuiz() {
     const quizContainer = $('.show-section.wrapper');
     quizContainer.empty();
 
-    // Update total question count in step-number-inner
-    $("#activeStep").parent().html(`Question <span id="activeStep">1</span>/${questions.length}`);
+    // Update total question count in step-number-inner (dynamic)
+    $("#totalQuestions").text(questions.length);
+    $("#activeStep").text(1);
 
     // Update step-bar to match number of questions
     const barContainer = $(".step-bar");
@@ -120,8 +124,20 @@ function countresult() {
 }
 
 // Call loadQuestions on page load
+
 $(document).ready(function() {
-    loadQuestions();
+    // Language selection modal logic
+    function startQuizWithLang(lang) {
+        $('#languageModal').hide();
+        $('#mainContent').css('filter', '');
+        loadQuestions(lang);
+    }
+    $('#lang-en').on('click', function() { startQuizWithLang('en'); });
+    $('#lang-ja').on('click', function() { startQuizWithLang('ja'); });
+    // If modal is not present (fallback), default to English
+    if ($('#languageModal').length === 0) {
+        loadQuestions('en');
+    }
 
     // Navigation logic (next/prev/submit)
     function updateStepBar(currentIdx) {
