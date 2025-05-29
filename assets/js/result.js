@@ -265,7 +265,6 @@ function countresult() {
 // Call loadQuestions on page load
 
 $(document).ready(function() {
-
     // Hint modal open/close logic
     $(document).on('click', '.hint-btn', function() {
         var text = $(this).attr('data-hint-text') || '';
