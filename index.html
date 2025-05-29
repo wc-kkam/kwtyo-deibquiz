@@ -25,12 +25,28 @@
 </head>
 <body>
 
-    <main class="overflow-hidden">
+
+    <!-- Opening Step: Language Selection Modal -->
+    <div id="languageModal" class="modal show" tabindex="-1" style="display: block; background: rgba(0,0,0,0.7); position: fixed; z-index: 9999; width: 100vw; height: 100vh; top: 0; left: 0;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4 text-center">
+                <img src="assets/images/Primary_Pride Logo_Black.png" alt="Logo" style="max-width: 180px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
+                <h2>Tokyo Pride 2025 Quiz</h2>
+                <p>Please select your Quiz Language:</p>
+                <div class="d-flex justify-content-center gap-3 my-3">
+                    <button id="lang-en" class="btn btn-primary">English</button>
+                    <button id="lang-ja" class="btn btn-secondary">日本語</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="overflow-hidden" style="filter: blur(2px);" id="mainContent">
 
         <!-- step-number -->
         <div class="step-number">
             <div class="step-number-inner">
-                Question <span id="activeStep">1</span>/5
+                Question <span id="activeStep">1</span>/<span id="totalQuestions">?</span>
             </div>
         </div>
 
