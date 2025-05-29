@@ -7,7 +7,8 @@
       "大胆に革新する",
       "権威を持つ"
     ],
-    "correct": "オープンワールドを受け入れる"
+    "correct": "オープンワールドを受け入れる",
+    "hint_text": "https://www.keywordsstudios.com/en/about-us/global-offer/responsible-business/people/#:~:text=Leadership%20Principles"
   },
   {
     "question": "キーワードスタジオの取り組みにおけるDEIBとは何の略ですか？",
@@ -17,7 +18,8 @@
       "多様性、公平性、包括性、帰属意識",
       "デザイン、平等、包括性、バランス"
     ],
-    "correct": "多様性、公平性、包括性、帰属意識"
+    "correct": "多様性、公平性、包括性、帰属意識",
+    "hint_text": "https://www.keywordsstudios.com/en/about-us/global-offer/responsible-business/people/"
   },
   {
     "question": "キーワードスタジオのElectric SquareとLively Studiosのインクルージョン＆ダイバーシティグループの名前は？",
@@ -27,7 +29,8 @@
       "コネクテッド",
       "イコールアクセス"
     ],
-    "correct": "コネクテッド"
+    "correct": "コネクテッド",
+    "hint_text": "https://www.keywordsstudios.com/en/about-us/global-offer/responsible-business/people/"
   },
   {
     "question": "次のうち、キーワードのインクルージョンカレンダーに記載されていないものはどれですか？",
@@ -37,7 +40,8 @@
       "神経多様性を祝う週",
       "グローバルアクセシビリティ認識デー"
     ],
-    "correct": "国際コーディング週間"
+    "correct": "国際コーディング週間",
+    "hint_text": "https://www.keywordsstudios.com/en/about-us/global-offer/responsible-business/people/"
   },
   {
     "question": "次のうち、アクセシビリティサービスを提供しているキーワードスタジオはどれですか？",
@@ -47,6 +51,7 @@
       "プレイヤーリサーチとディスクリプティブオーディオワークス",
       "該当なし"
     ],
-    "correct": "プレイヤーリサーチとディスクリプティブオーディオワークス"
+    "correct": "プレイヤーリサーチとディスクリプティブオーディオワークス",
+    "hint_text": "https://www.keywordsstudios.com/en/accessibility/"
   }
 ]

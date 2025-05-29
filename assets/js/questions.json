@@ -7,17 +7,8 @@
       "Innovate Boldly",
       "Be Authoritative"
     ],
-    "correct": "Embrace an Open World"
-  },
-  {
-    "question": "What does DEIB stand for in the context of Keywords Studios’ initiatives?",
-    "answers": [
-      "Development, Equity, Inclusion, Business",
-      "Diversity, Equality, Innovation, Belonging",
-      "Diversity, Equity, Inclusion, Belonging",
-      "Design, Equality, Inclusion, Balance"
-    ],
-    "correct": "Diversity, Equity, Inclusion, Belonging"
+    "correct": "Embrace an Open World",
+    "hint_text": "Hint: This principle encourages openness and embracing new perspectives."
   },
   {
     "question": "What is the inclusion and diversity group at Keywords Studio’s Electric Square and Lively Studios called?",
@@ -27,7 +18,8 @@
       "Connected",
       "Equal Access"
     ],
-    "correct": "Connected"
+    "correct": "Connected",
+    "hint_text": "Hint: The group name reflects connection and unity."
   },
   {
     "question": "Which of the following is NOT listed as part of the Keywords inclusion calendar?",
@@ -37,7 +29,8 @@
       "Neurodiversity Celebration Week",
       "Global Accessibility Awareness Day"
     ],
-    "correct": "International Coding Week"
+    "correct": "International Coding Week",
+    "hint_text": "Hint: Think about events that promote inclusion and accessibility."
   },
   {
     "question": "Which of the following Keywords Studios provides accessibility services?",
@@ -47,17 +40,8 @@
       "Player Research and Descriptive Audio Works",
       "No Studios"
     ],
-    "correct": "Player Research and Descriptive Audio Works"
-  },
-  {
-    "question": "What was launched by Keywords Studios in 2022 to address gender equity?",
-    "answers": [
-      "Keywords Academy",
-      "Gender Equity Taskforce",
-      "Women at Keywords community",
-      "Balanced Leadership Program"
-    ],
-    "correct": "Women at Keywords community"
+    "correct": "Player Research and Descriptive Audio Works",
+    "hint_text": "Hint: Both Player Research and Descriptive Audio Works are involved in accessibility."
   },
   {
     "question": "According to a 2023 pulse survey, what percentage of Keywords Australia colleagues identified as neurodivergent?",
@@ -67,17 +51,8 @@
       "73%",
       "100%"
     ],
-    "correct": "47%"
-  },
-  {
-    "question": "What kind of resource is the Inclusion Hub?",
-    "answers": [
-      "A recruitment tool",
-      "A community chat space",
-      "A central repository for learning materials, communities, and calendar events",
-      "A finance portal for DEIB budgeting"
-    ],
-    "correct": "A central repository for learning materials, communities, and calendar events"
+    "correct": "47%",
+    "hint_text": "Hint: The percentage is less than half but more than 10%."
   },
   {
     "question": "Which month does Keywords Studios celebrate Black History Month in the UK?",
@@ -87,7 +62,8 @@
       "October",
       "November"
     ],
-    "correct": "October"
+    "correct": "October",
+    "hint_text": "Hint: Black History Month in the UK is celebrated in the autumn."
   },
   {
     "question": "Which external partner helps promote gender equity in the games industry with Keywords?",
@@ -97,7 +73,8 @@
       "Women in Games",
       "Women in Tech"
     ],
-    "correct": "Women in Games"
+    "correct": "Women in Games",
+    "hint_text": "Hint: This partner is dedicated to supporting women in the games industry."
   },
   {
     "question": "How is DEIB embedded into Keywords' employee experience?",
@@ -107,17 +84,8 @@
       "In performance reviews only",
       "Through project management tools"
     ],
-    "correct": "Through Hiring, Onboarding, Learning, and Reviews"
-  },
-  {
-    "question": "What’s the name of the internal platform launched to support inclusive work culture?",
-    "answers": [
-      "Keywords Connect",
-      "Inclusion Hub",
-      "DEIB Portal",
-      "OpenWorld"
-    ],
-    "correct": "Inclusion Hub"
+    "correct": "Through Hiring, Onboarding, Learning, and Reviews",
+    "hint_text": "Hint: DEIB is integrated throughout the employee journey."
   },
   {
     "question": "Which of these statements best reflects the goal of Keywords’ DEIB work?",
@@ -127,17 +95,19 @@
       "Foster a strong sense of belonging and inclusion globally",
       "Only recruit talent from underrepresented communities"
     ],
-    "correct": "Foster a strong sense of belonging and inclusion globally"
+    "correct": "Foster a strong sense of belonging and inclusion globally",
+    "hint_text": "Hint: The goal is to foster belonging and inclusion globally."
   },
   {
-    "question": "Which Global Program does Keywords Studios sponsor",
+    "question": "Which Women in Games programme does Keywords Studios sponsor?",
     "answers": [
       "Games for Change",
-      "Women in Games",
+      "Individual Ambassador Programme",
       "Interactive Inclusion",
       "Tech4All"
     ],
-    "correct": "Women in Games"
+    "correct": "Individual Ambassador Programme",
+    "hint_text": "Hint: Keywords sponsors a program that supports individuals representing women in gaming on a global stage."
   },
   {
     "question": "What best describes the latest global scale of Keywords Studios in terms of employees, nationalities, and studios?",
@@ -147,7 +117,8 @@
       "13,000 employees, 100+ nationalities, 70+ studios",
       "14,000 employees, 80 nationalities, 85 studios"
     ],
-    "correct": "13,000 employees, 100+ nationalities, 70+ studios"
+    "correct": "13,000 employees, 100+ nationalities, 70+ studios",
+    "hint_text": "Hint: There are over 90 nationalities in Keywords Studios."
   },
   {
     "question": "What is the theme of 2025 Tokyo Pride?",
@@ -157,17 +128,8 @@
       "Same Life, Same Rights",
       "Stand By Me in Diversity"
     ],
-    "correct": "Same Life, Same Rights"
-  },
-  {
-    "question": "Which of the following best describes Diversity and Inclusion (D&I) in the workplace?",
-    "answers": [
-      "A policy that excludes individuals with diverse perspectives",
-      "A strategy to promote unfair treatment in the workplace",
-      "A concept that focuses only on age, race, gender, and ethnicity",
-      "A culture that values individuals from differing backgrounds"
-    ],
-    "correct": "A culture that values individuals from differing backgrounds"
+    "correct": "Same Life, Same Rights",
+    "hint_text": "Hint: The 2025 theme focuses on equality and rights for all."
   },
   {
     "question": "When were Keywords Dublin (headquarter) and keywords Tokyo originally founded?",
@@ -177,7 +139,8 @@
       "1996 and 2010",
       "1996 and 2012"
     ],
-    "correct": "1998 and 2010"
+    "correct": "1998 and 2010",
+    "hint_text": "Hint: Dublin was founded in the late 1990s, Tokyo in the early 2010s."
   },
   {
     "question": "What best describes the purpose of diversity and inclusion principles in the workplace?",
@@ -187,6 +150,7 @@
       "Hire based on age, race, gender, and ethnicity",
       "Foster a respectful, fair, and supportive workplace culture"
     ],
-    "correct": "Foster a respectful, fair, and supportive workplace culture"
+    "correct": "Foster a respectful, fair, and supportive workplace culture",
+    "hint_text": "Hint: The purpose is to create a fair and supportive workplace for everyone."
   }
 ]

@@ -37,6 +37,22 @@ function loadQuestions(lang = 'en') {
 }
 
 function renderQuiz() {
+    // Add modal HTML if not present
+    if (!document.getElementById('hintModalOverlay')) {
+        const modalHtml = `
+            <div id="hintModalOverlay" style="display:none;">
+                <div id="hintModal">
+                    <div id="hintModalHeader">
+                        Hint
+                        <button id="hintModalClose" aria-label="Close">&times;</button>
+                    </div>
+                    <div id="hintModalBody"></div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+    // Add floating hint button styles if not already present
     const quizContainer = $('.show-section.wrapper');
     quizContainer.empty();
 
@@ -62,10 +78,16 @@ function renderQuiz() {
                 </div>
             `;
         });
+        // Only show hint button if not the last question
+        let hintBtn = '';
+        if (q.hint_text && stepNum < questions.length) {
+            hintBtn = `<button type="button" class="hint-btn" data-hint-text="${q.hint_text.replace(/"/g, '&quot;')}" title="Show hint"><i class="fa-solid fa-lightbulb"></i> Hint</button>`;
+        }
         quizContainer.append(`
             <section class="steps">
                 <form id="step${stepNum}" method="post" novalidate>
                     <h2 class="q-heading">${q.question}</h2>
+                    ${hintBtn}
                     <div class="form-inner">${answersHtml}</div>
                     <div class="next-prev">
                         ${stepNum > 1 ? `<button type="button" class="prev"><i class="fa-solid fa-arrow-left"></i>last question</button>` : ''}
@@ -77,6 +99,123 @@ function renderQuiz() {
     });
     // Add question mark image
     quizContainer.append('<div class="question overflow-hidden"><img src="assets/images/question-sign.png" alt="question"></div>');
+
+    // Add floating hint button styles if not already present
+    if (!document.getElementById('hint-btn-style')) {
+        const style = document.createElement('style');
+        style.id = 'hint-btn-style';
+        style.innerHTML = `
+            .hint-btn {
+                position: fixed !important;
+                /* Align with bottom of .step-number (67px height + 16px margin) */
+                top: 83px;
+                right: 32px;
+                z-index: 2147483646;
+                background: #fffbe6;
+                color: #0042ff;
+                border-radius: 20px;
+                padding: 6px 16px 6px 12px;
+                font-weight: bold;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                border: 1px solid #ffe066;
+                transition: background 0.2s, color 0.2s;
+            }
+            .hint-btn:hover {
+                background: #ffe066;
+                color: #222;
+            }
+            @media (max-width: 600px) {
+                .hint-btn {
+                    top: 75px;
+                    right: 12px;
+                    padding: 6px 10px 6px 10px;
+                    font-size: 14px;
+                }
+            }
+
+            /* Centered modal overlay and modal styles */
+            #hintModalOverlay {
+                position: fixed !important;
+                top: 0; left: 0; right: 0; bottom: 0;
+                width: 100vw; height: 100vh;
+                background: rgba(0,0,0,0.35);
+                z-index: 2147483647 !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.2s;
+            }
+            #hintModal {
+                background: #fff;
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+                max-width: 90vw;
+                width: 480px;
+                max-height: 80vh;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                position: relative;
+            }
+            #hintModalBody {
+                padding: 28px 28px 32px 28px;
+                font-size: 1.08rem;
+                color: #222;
+                line-height: 1.6;
+                word-break: break-word;
+            }
+            #hintModalHeader {
+                font-size: 1.2rem;
+                font-weight: bold;
+                background: #f6f6f6;
+                padding: 16px 20px 16px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid #eee;
+            }
+            #hintModalClose {
+                background: none;
+                border: none;
+                font-size: 1.3rem;
+                cursor: pointer;
+                color: #333;
+                margin-left: 12px;
+                padding: 0 6px;
+                border-radius: 4px;
+                transition: background 0.2s;
+            }
+            #hintModalClose:hover {
+                background: #eee;
+            }
+            #hintModalIframe {
+                border: none;
+                width: 100%;
+                height: 350px;
+                flex: 1 1 auto;
+                background: #fafafa;
+            }
+            @media (max-width: 600px) {
+                #hintModal {
+                    width: 98vw;
+                    min-width: 0;
+                    max-width: 98vw;
+                    border-radius: 8px;
+                }
+                #hintModalHeader {
+                    padding: 12px 10px 12px 10px;
+                }
+                #hintModalIframe {
+                    height: 200px;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 }
 
 function countresult() {
@@ -126,6 +265,26 @@ function countresult() {
 // Call loadQuestions on page load
 
 $(document).ready(function() {
+
+    // Hint modal open/close logic
+    $(document).on('click', '.hint-btn', function() {
+        var text = $(this).attr('data-hint-text') || '';
+        // Remove the word "Hint:" (case-insensitive, with or without space or colon) from the start
+        text = text.replace(/^\s*hint\s*:?\s*/i, '');
+        $('#hintModalBody').text(text);
+        $('#hintModalOverlay').show();
+    });
+    $(document).on('click', '#hintModalClose', function() {
+        $('#hintModalOverlay').hide();
+        $('#hintModalBody').text('');
+    });
+    // Optional: close modal when clicking outside
+    $(document).on('click', '#hintModalOverlay', function(e) {
+        if (e.target === this) {
+            $('#hintModalOverlay').hide();
+            $('#hintModalBody').text('');
+        }
+    });
     // Language selection modal logic
     function startQuizWithLang(lang) {
         $('#languageModal').hide();
