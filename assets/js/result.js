@@ -37,6 +37,24 @@ function loadQuestions(lang = 'en') {
 }
 
 function renderQuiz() {
+    // Add style for correct answer reveal animation if not present
+    if (!document.getElementById('correct-reveal-style')) {
+        const style = document.createElement('style');
+        style.id = 'correct-reveal-style';
+        style.innerHTML = `
+            .correct-reveal {
+                animation: correctRevealBorder 0.7s;
+                border: 2.5px solid #2ecc40 !important;
+                box-sizing: border-box;
+            }
+            @keyframes correctRevealBorder {
+                0% { border-color: #fff; }
+                50% { border-color: #2ecc40; }
+                100% { border-color: #fff; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
     // Add modal HTML if not present
     if (!document.getElementById('hintModalOverlay')) {
         const modalHtml = `
@@ -80,8 +98,12 @@ function renderQuiz() {
         });
         // Only show hint button if not the last question
         let hintBtn = '';
+        // Add badge for hint counter (will be updated dynamically)
         if (q.hint_text && stepNum < questions.length) {
-            hintBtn = `<button type="button" class="hint-btn" data-hint-text="${q.hint_text.replace(/"/g, '&quot;')}" title="Show hint"><i class="fa-solid fa-lightbulb"></i> Hint</button>`;
+            hintBtn = `<button type="button" class="hint-btn" data-hint-text="${q.hint_text.replace(/"/g, '&quot;')}" title="Show hint" style="position:relative;">
+                <span class="hint-badge"><i class="fa-solid fa-lightbulb"></i></span> Hint
+                <span class="hint-notification-badge">3</span>
+            </button>`;
         }
         quizContainer.append(`
             <section class="steps">
@@ -90,8 +112,7 @@ function renderQuiz() {
                     ${hintBtn}
                     <div class="form-inner">${answersHtml}</div>
                     <div class="next-prev">
-                        ${stepNum > 1 ? `<button type="button" class="prev"><i class="fa-solid fa-arrow-left"></i>last question</button>` : ''}
-                        ${stepNum < questions.length ? `<button type="button" class="next" id="step${stepNum}btn">next question<i class="fa-solid fa-arrow-right"></i></button>` : `<button type="button" class="apply" id="sub">Submit<i class="fa-solid fa-arrow-right"></i></button>`}
+                        ${stepNum === questions.length ? `<button type="button" class="apply" id="sub">Submit<i class="fa-solid fa-arrow-right"></i></button>` : ''}
                     </div>
                 </form>
             </section>
@@ -107,7 +128,6 @@ function renderQuiz() {
         style.innerHTML = `
             .hint-btn {
                 position: fixed !important;
-                /* Align with bottom of .step-number (67px height + 16px margin) */
                 top: 83px;
                 right: 32px;
                 z-index: 2147483646;
@@ -123,6 +143,24 @@ function renderQuiz() {
                 gap: 6px;
                 border: 1px solid #ffe066;
                 transition: background 0.2s, color 0.2s;
+                position: fixed;
+                overflow: visible;
+            }
+            .hint-btn .hint-notification-badge {
+                position: absolute;
+                left: -10px;
+                bottom: -10px;
+                background: #ff4d4f;
+                color: #fff;
+                border-radius: 50%;
+                font-size: 12px;
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+                text-align: center;
+                font-weight: bold;
+                pointer-events: none;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.10);
             }
             .hint-btn:hover {
                 background: #ffe066;
@@ -265,24 +303,52 @@ function countresult() {
 // Call loadQuestions on page load
 
 $(document).ready(function() {
+    // Hints logic
+    let hintsRemaining = 3;
+    function updateHintBadge() {
+        $('.hint-notification-badge').text(hintsRemaining);
+        if (hintsRemaining <= 0) {
+            $('.hint-btn').hide();
+        } else {
+            $('.hint-btn').show();
+        }
+    }
+    // On quiz render, reset hints
+    $(document).on('quizRendered', function() {
+        hintsRemaining = 3;
+        updateHintBadge();
+    });
 
     // Hint modal open/close logic
     $(document).on('click', '.hint-btn', function() {
+        if (hintsRemaining <= 0) return;
         var text = $(this).attr('data-hint-text') || '';
         // Remove the word "Hint:" (case-insensitive, with or without space or colon) from the start
         text = text.replace(/^\s*hint\s*:?\s*/i, '');
-        $('#hintModalBody').text(text);
+        // Append remaining hints info (do not decrease yet)
+        const hintFooter = `<div style=\"margin-top:18px;font-size:0.98rem;color:#666;text-align:center;\">You have ${hintsRemaining} hint${hintsRemaining === 1 ? '' : 's'} remaining</div>`;
+        $('#hintModalBody').html(text + hintFooter);
         $('#hintModalOverlay').show();
+        // Store that a hint is open and should decrement on close
+        $('#hintModalOverlay').data('pendingHintDecrement', true);
     });
-    $(document).on('click', '#hintModalClose', function() {
+    function closeHintModalAndDecrement() {
         $('#hintModalOverlay').hide();
         $('#hintModalBody').text('');
+        // Only decrement if a hint was open and not already decremented
+        if ($('#hintModalOverlay').data('pendingHintDecrement')) {
+            hintsRemaining--;
+            updateHintBadge();
+            $('#hintModalOverlay').data('pendingHintDecrement', false);
+        }
+    }
+    $(document).on('click', '#hintModalClose', function() {
+        closeHintModalAndDecrement();
     });
     // Optional: close modal when clicking outside
     $(document).on('click', '#hintModalOverlay', function(e) {
         if (e.target === this) {
-            $('#hintModalOverlay').hide();
-            $('#hintModalBody').text('');
+            closeHintModalAndDecrement();
         }
     });
     // Language selection modal logic
@@ -307,18 +373,7 @@ $(document).ready(function() {
         }
     }
 
-    $(document).on('click', '.next', function() {
-        const currentSection = $(this).closest('section');
-        const nextSection = currentSection.next('section');
-        if(nextSection.length) {
-            currentSection.hide();
-            nextSection.show();
-            // Update step number
-            const idx = nextSection.index();
-            $('#activeStep').text(idx + 1);
-            updateStepBar(idx);
-        }
-    });
+    // Remove all .next button logic (auto-advance will be handled below)
     $(document).on('click', '.prev', function() {
         const currentSection = $(this).closest('section');
         const prevSection = currentSection.prev('section');
@@ -348,18 +403,108 @@ $(document).ready(function() {
         const formId = section.find('form').attr('id');
         const stepNum = parseInt(formId.replace('step', ''));
         const q = questions[stepNum - 1];
+        let isCorrect = false;
+        let isWrong = false;
+        let selectedInput = null;
+        // First, clear only the incorrect/correct-reveal classes, but do NOT clear icons yet
+        section.find('.radio-field').removeClass('incorrect correct-reveal');
+        let correctRadioField = null;
         section.find('.radio-field').each(function() {
             const input = $(this).find('input');
             const iconSpan = $(this).find('.answer-icon');
+            if (input.val() === q.correct) {
+                correctRadioField = $(this);
+            }
             if (input.is(':checked')) {
+                selectedInput = input;
                 if (input.val() === q.correct) {
                     iconSpan.html('<i class="fa-solid fa-check" style="color:green"></i>');
+                    isCorrect = true;
                 } else {
                     iconSpan.html('<i class="fa-solid fa-xmark" style="color:red"></i>');
                     $(this).addClass('incorrect');
+                    isWrong = true;
                 }
             }
         });
+        // If correct, auto-advance after a short delay (for animation)
+        if (isCorrect && stepNum < questions.length) {
+            setTimeout(function() {
+                section.hide();
+                const nextSection = section.next('section');
+                if(nextSection.length) {
+                    nextSection.show();
+                    // Update step number
+                    const idx = nextSection.index();
+                    $('#activeStep').text(idx + 1);
+                    updateStepBar(idx);
+                }
+            }, 900); // 900ms delay for animation
+        } else if (isWrong && stepNum < questions.length) {
+            // Pulse (jiggle) the correct answer after the wrong animation
+            setTimeout(function() {
+                if (correctRadioField) {
+                    // Find the label span for the answer text
+                    var answerTextSpan = correctRadioField.find('.answer-text');
+                    // Add green border to the nearest .radio-field div (in case structure changes)
+                    var radioFieldDiv = answerTextSpan.closest('.radio-field');
+                    radioFieldDiv.addClass('flash-green-border');
+                    // Make text green and bold for the flash
+                    answerTextSpan.addClass('flash-green');
+                    answerTextSpan.css({
+                        'color': '#2ecc40',
+                        'font-weight': 'bold'
+                    });
+                    // Remove the animation class and extra styles after it finishes (1200ms)
+                    setTimeout(function() {
+                        answerTextSpan.removeClass('flash-green');
+                        answerTextSpan.css({
+                            'color': '',
+                            'font-weight': ''
+                        });
+                        radioFieldDiv.removeClass('flash-green-border');
+                    }, 1200);
+                }
+                // Wait for the animation to be visible, then move to next question
+                setTimeout(function() {
+                    // Now clear all icons (after animation), then move on
+                    section.find('.radio-field .answer-icon').empty();
+                    section.hide();
+                    const nextSection = section.next('section');
+                    if(nextSection.length) {
+                        nextSection.show();
+                        // Update step number
+                        const idx = nextSection.index();
+                        $('#activeStep').text(idx + 1);
+                        updateStepBar(idx);
+                    }
+                }, 1400); // 1400ms after flash
+            }, 900); // 900ms after wrong animation
+        }
+    // Add style for correct answer reveal animation if not present
+    if (!document.getElementById('correct-reveal-style')) {
+        const style = document.createElement('style');
+        style.id = 'correct-reveal-style';
+        style.innerHTML = `
+            .flash-green {
+                animation: flashGreenText 1.2s cubic-bezier(.36,.07,.19,.97) both;
+            }
+            @keyframes flashGreenText {
+                0% { color: #222; }
+                10% { color: #2ecc40; }
+                30% { color: #2ecc40; }
+                50% { color: #fff; }
+                70% { color: #2ecc40; }
+                100% { color: #222; }
+            }
+            .flash-green-border {
+                border: 3px solid #2ecc40 !important;
+                border-radius: 10px;
+                transition: border 0.2s;
+            }
+        `;
+        document.head.appendChild(style);
+    }
     });
 
     // Show only the first question at start
