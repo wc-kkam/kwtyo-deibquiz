@@ -11,7 +11,7 @@
   
 body
 {
-    font-family: "Jost";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     background-image: url(../images/bg.jpg);
     background-size: cover;
     width: 100%;
@@ -116,8 +116,8 @@ main
 
 .q-heading
 {
-  font-size: 40px;
-  font-family: "Sen";
+  font-size: 34px;
+  font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
   color: var(--text-color);
   font-weight: 900;
 }
@@ -204,8 +204,8 @@ form
 {
     position: relative;
     z-index: 10;
-    font-size: 22px;
-    font-family: "Sen";
+    font-size: 19px;
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     font-weight: 800;
     color: var(--text-color);
     pointer-events: none;
@@ -233,7 +233,7 @@ form
     background-color: rgb(255, 255, 255);
     box-shadow: 0px 2px 21px 0px rgba(0, 0, 0, 0.03);
     font-size: 18px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: var(--text-color);
     font-weight: 800;
     text-transform: uppercase;

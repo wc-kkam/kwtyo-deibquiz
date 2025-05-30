@@ -1,0 +1,24 @@
+{
+  "en": {
+    "knowledge_check": "Knowledge Check",
+    "your_score": "Your Score:",
+    "passing_score": "Passing Score:",
+    "points": "Points",
+    "result": "Result",
+    "pass": "You Passed!",
+    "fail": "You did not Pass",
+    "pass_msg": "You passed the test!",
+    "fail_msg": "Better Luck Next Time!"
+  },
+  "ja": {
+    "knowledge_check": "知識チェック",
+    "your_score": "あなたのスコア：",
+    "passing_score": "合格スコア：",
+    "points": "ポイント",
+    "result": "結果",
+    "pass": "合格しました！",
+    "fail": "不合格です",
+    "pass_msg": "テストに合格しました！",
+    "fail_msg": "次回に期待しましょう！"
+  }
+}

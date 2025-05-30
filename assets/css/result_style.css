@@ -83,7 +83,7 @@
 .result_inner h2
 {
     font-size: 42px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-weight: 900;
     margin-bottom: 40px;
@@ -104,7 +104,7 @@
     height: 100%;
     min-width: 45%;
     font-size: 28px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-weight: 900;
     background-color: rgb(226, 226, 226);
@@ -127,7 +127,7 @@
     background-color: rgb(237, 237, 237);
     z-index: 9;
     font-size: 30px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-weight: 700;
     display: grid;
@@ -138,7 +138,7 @@
 .u_result span,.p_result span
 {
     font-size: 30px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-weight: 700;
     display: grid;
@@ -171,7 +171,7 @@
 .pass_check
 {
     font-size: 20px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     display: flex;
     align-items: center;
@@ -185,7 +185,7 @@
 }
 .result_msg
 {
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-size: 25px;
     margin-top: 30px;

@@ -1,13 +1,41 @@
-function showresult()
-{
+// Language-aware result page rendering
+let resultStrings = null;
+let currentLang = 'en';
+
+function showresult() {
+    // Load result strings if not already loaded
+    if (!resultStrings) {
+        $.ajax({
+            url: 'assets/js/result_strings.json',
+            dataType: 'json',
+            async: false,
+            success: function(data) { resultStrings = data; },
+            error: function() { resultStrings = null; }
+        });
+    }
+    // Try to detect language from quiz (fallback to en)
+    if (window.selectedQuizLang) {
+        currentLang = window.selectedQuizLang;
+    } else if (typeof getCurrentQuizLang === 'function') {
+        currentLang = getCurrentQuizLang();
+    }
+    if (!resultStrings || !resultStrings[currentLang]) currentLang = 'en';
+    const strings = resultStrings[currentLang];
+
+    // Update result page text
+    $('.result_inner2 h2').text(strings.knowledge_check);
+    $('.u_score').text(strings.your_score);
+    $('.u_result span').text($('.u_result span').text().replace(/\d+\s*\w+/, strings.points));
+    $('.p_score').text(strings.passing_score);
+    $('.p_result span').text($('.p_result span').text().replace(/\d+\s*\w+/, strings.points));
+    $('.result_show h2').text(strings.result);
+
+    // Show loading, then reveal result page
     $('.loadingresult').css('display', 'grid');
-
-    setTimeout(function()
-    {
+    setTimeout(function() {
         $('.result_page').addClass('result_page_show');
-
-    },1000)
-};
+    }, 1000);
+}
 
         
         
@@ -290,13 +318,29 @@ function countresult() {
     var correctprcnt = correct / steps * 100;
     $('.u_prcnt').html(correctprcnt + '%');
     $('.u_result span').html(correctprcnt + ' Points');
+    if (!resultStrings) {
+        $.ajax({
+            url: 'assets/js/result_strings.json',
+            dataType: 'json',
+            async: false,
+            success: function(data) { resultStrings = data; },
+            error: function() { resultStrings = null; }
+        });
+    }
+    if (window.selectedQuizLang) {
+        currentLang = window.selectedQuizLang;
+    } else if (typeof getCurrentQuizLang === 'function') {
+        currentLang = getCurrentQuizLang();
+    }
+    if (!resultStrings || !resultStrings[currentLang]) currentLang = 'en';
+    const strings = resultStrings[currentLang];
     if(correctprcnt >=80)
     {
-        $('.pass_check').html('<i class="fa-solid fa-check"></i> You Passed!');
-        $('.result_msg').html('You passed the test!');
+        $('.pass_check').html('<i class="fa-solid fa-check"></i> ' + strings.pass);
+        $('.result_msg').html(strings.pass_msg);
     } else {
-        $('.pass_check').html('<i class="fa-solid fa-xmark"></i>You did not Pass');
-        $('.result_msg').html('Better Luck Next Time!');
+        $('.pass_check').html('<i class="fa-solid fa-xmark"></i>' + strings.fail);
+        $('.result_msg').html(strings.fail_msg);
     }
 }
 
@@ -448,7 +492,7 @@ $(document).ready(function() {
                     var answerTextSpan = correctRadioField.find('.answer-text');
                     // Add green border to the nearest .radio-field div (in case structure changes)
                     var radioFieldDiv = answerTextSpan.closest('.radio-field');
-                    radioFieldDiv.addClass('flash-green-border');
+                    radioFieldDiv.addClass('flash-green-border flash-black-stroke');
                     // Make text green and bold for the flash
                     answerTextSpan.addClass('flash-green');
                     answerTextSpan.css({
@@ -462,22 +506,25 @@ $(document).ready(function() {
                             'color': '',
                             'font-weight': ''
                         });
-                        radioFieldDiv.removeClass('flash-green-border');
+                        radioFieldDiv.removeClass('flash-green-border flash-black-stroke');
                     }, 1200);
                 }
-                // Wait for the animation to be visible, then move to next question
+                // Wait for the animation to be visible, then move to next question (unless last question)
                 setTimeout(function() {
                     // Now clear all icons (after animation), then move on
                     section.find('.radio-field .answer-icon').empty();
-                    section.hide();
-                    const nextSection = section.next('section');
-                    if(nextSection.length) {
-                        nextSection.show();
-                        // Update step number
-                        const idx = nextSection.index();
-                        $('#activeStep').text(idx + 1);
-                        updateStepBar(idx);
+                    if (stepNum < questions.length) {
+                        section.hide();
+                        const nextSection = section.next('section');
+                        if(nextSection.length) {
+                            nextSection.show();
+                            // Update step number
+                            const idx = nextSection.index();
+                            $('#activeStep').text(idx + 1);
+                            updateStepBar(idx);
+                        }
                     }
+                    // If last question, stay and let highlight show
                 }, 1400); // 1400ms after flash
             }, 900); // 900ms after wrong animation
         }
@@ -501,6 +548,9 @@ $(document).ready(function() {
                 border: 3px solid #2ecc40 !important;
                 border-radius: 10px;
                 transition: border 0.2s;
+            }
+            .flash-black-stroke {
+                box-shadow: 0 0 0 2px #111, 0 0 0 0 #2ecc40;
             }
         `;
         document.head.appendChild(style);
