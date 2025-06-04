@@ -2,11 +2,12 @@
 let resultStrings = null;
 let currentLang = 'en';
 
-function showresult() {
+function showresult(modalMode) {
+    $root.find('.result-label')
     // Load result strings if not already loaded
     if (!resultStrings) {
         $.ajax({
-            url: 'assets/js/result_strings.json',
+            url: 'assets/js/result_strings.json?v=4',
             dataType: 'json',
             async: false,
             success: function(data) { resultStrings = data; },
@@ -22,26 +23,69 @@ function showresult() {
     if (!resultStrings || !resultStrings[currentLang]) currentLang = 'en';
     const strings = resultStrings[currentLang];
 
-    // Update result page text
-    $('.result_inner2 h2').text(strings.knowledge_check);
-    $('.u_score').text(strings.your_score);
-    $('.u_result span').text($('.u_result span').text().replace(/\d+\s*\w+/, strings.points));
-    $('.p_score').text(strings.passing_score);
-    $('.p_result span').text($('.p_result span').text().replace(/\d+\s*\w+/, strings.points));
-    $('.result_show h2').text(strings.result);
+    // Update result page text and layout
+    $root.find('.result-title').text(strings.knowledge_check);
+    let correctNum = 0;
+    let totalNum = 0;
+    if (typeof questions !== 'undefined' && questions.length && window.userAnswers) {
+        totalNum = questions.length;
+        // Debug: log user answers and correct answers
+        console.log('userAnswers:', window.userAnswers);
+        console.log('correctAnswers:', questions.map(q => q.correct));
+        // Count correct answers, robust to type
+        correctNum = questions.filter((q, i) => String(window.userAnswers[i]) === String(q.correct)).length;
+        // Warn if any answers are missing
+        if (window.userAnswers.length < questions.length || window.userAnswers.includes(undefined)) {
+            console.warn('Some answers are missing or undefined:', window.userAnswers);
+        }
+    }
+    if (!totalNum) totalNum = 10;
+    if (typeof correctNum !== 'number' || isNaN(correctNum)) correctNum = 0;
+    // Always show 8/10 for passing
+    const passingNum = 8;
+    // Localize labels
+    $('.result_page .result-label').eq(0).text(strings.your_score);
+    $('.result_page .result-label').eq(1).text(strings.passing_score);
+    $root.find('.result-correct').text(`${correctNum} / ${totalNum}`);
+    $root.find('.result-passing').text(`${passingNum} / ${totalNum}`);
+    // Debug: log to confirm update
+    console.log('Updated result-correct:', $root.find('.result-correct').text());
+    console.log('Updated result-passing:', $root.find('.result-passing').text());
+    // Debug: log to confirm update
+    console.log('Updated result-correct:', $('.result-correct').text());
+    console.log('Updated result-passing:', $('.result-passing').text());
+
+    // Pass/fail logic
+    const isPass = correctNum >= passingNum;
+    const statusText = isPass ? strings.pass : strings.fail;
+    const msgText = isPass ? strings.pass_msg : strings.fail_msg;
+    $root.find('.result-status').text(statusText);
+    $root.find('.result_msg').text(msgText);
+    // Add the resource link
+    $root.find('.result_link').html(`
+        <span style="vertical-align:middle;display:inline-block;margin-right:8px;">
+            <i class="fa-solid fa-circle-info" style="color:#0042ff;font-size:22px;"></i>
+        </span>
+        <a href="${strings.link_url}" target="_blank" rel="noopener" style="color:#0042ff;font-weight:bold;text-decoration:underline;vertical-align:middle;">${strings.link_url}</a>
+    `);
 
     // Show loading, then reveal result page
+    if (!modalMode) {
     $('.loadingresult').css('display', 'grid');
     setTimeout(function() {
+        $('.result-correct')[0]?.offsetHeight;
+        $('.result-passing')[0]?.offsetHeight;
         $('.result_page').addClass('result_page_show');
     }, 1000);
+}
 }
 
         
         
 // Load questions from JSON and render quiz dynamically
 let questions = [];
-let userAnswers = [];
+// Always use window.userAnswers as the global answer array
+window.userAnswers = [];
 
 
 function shuffleArray(array) {
@@ -55,16 +99,50 @@ function shuffleArray(array) {
 // Load questions with language support
 function loadQuestions(lang = 'en') {
     let file = 'assets/js/questions.json';
-    if (lang === 'ja') file = 'assets/js/questions_ja.json';
+    let useLang = lang;
+    if (lang === 'ja') {
+        file = 'assets/js/questions_ja.json';
+        useLang = 'ja';
+    }
     $.getJSON(file, function(data) {
-        // Shuffle and take 10 questions (or all if less than 10)
+        // Always use 10 questions for both EN and JA
         const shuffled = shuffleArray(data.slice());
         questions = shuffled.slice(0, 10);
+        // Reset global userAnswers to correct length, all undefined
+        window.userAnswers = new Array(questions.length);
+        // Set currentLang for localization
+        currentLang = useLang;
         renderQuiz();
+        // Update total question count in navigation UI (step-number-inner)
+        $("#totalQuestions").text(questions.length);
+        // Update step-bar to match number of questions
+        const barContainer = $(".step-bar");
+        if (barContainer.length) {
+            barContainer.empty();
+            for (let i = 0; i < questions.length; i++) {
+                barContainer.append('<div class="bar"><div class="fill"></div></div>');
+            }
+        }
     });
 }
 
 function renderQuiz() {
+    // Ensure localization is loaded before rendering
+    if (!resultStrings) {
+        $.ajax({
+            url: 'assets/js/result_strings.json',
+            dataType: 'json',
+            async: false,
+            success: function(data) { resultStrings = data; },
+            error: function() { throw new Error('Could not load result_strings.json'); }
+        });
+    }
+    if (!resultStrings[currentLang] || !resultStrings[currentLang].hint_label) {
+        console.error('Missing localized hint_label for language:', currentLang);
+        throw new Error('Missing localized hint_label for language: ' + currentLang);
+    }
+    let hintLabel = resultStrings[currentLang].hint_label;
+
     // Add style for correct answer reveal animation if not present
     if (!document.getElementById('correct-reveal-style')) {
         const style = document.createElement('style');
@@ -85,11 +163,17 @@ function renderQuiz() {
     }
     // Add modal HTML if not present
     if (!document.getElementById('hintModalOverlay')) {
+        // Use localized hint label for modal header, and enforce presence
+        if (!resultStrings || !resultStrings[currentLang] || !resultStrings[currentLang].hint_label) {
+            console.error('Missing localized hint_label for language:', currentLang);
+            throw new Error('Missing localized hint_label for language: ' + currentLang);
+        }
+        let hintLabel = resultStrings[currentLang].hint_label;
         const modalHtml = `
             <div id="hintModalOverlay" style="display:none;">
                 <div id="hintModal">
                     <div id="hintModalHeader">
-                        Hint
+                        ${hintLabel}
                         <button id="hintModalClose" aria-label="Close">&times;</button>
                     </div>
                     <div id="hintModalBody"></div>
@@ -98,19 +182,26 @@ function renderQuiz() {
         `;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
-    // Add floating hint button styles if not already present
+
+    // Always reset and update navigation UI (step bar and question count)
     const quizContainer = $('.show-section.wrapper');
     quizContainer.empty();
 
     // Update total question count in step-number-inner (dynamic)
-    $("#totalQuestions").text(questions.length);
-    $("#activeStep").text(1);
+    if ($('#totalQuestions').length) {
+        $('#totalQuestions').text(questions.length);
+    }
+    if ($('#activeStep').length) {
+        $('#activeStep').text(1);
+    }
 
-    // Update step-bar to match number of questions
+    // Remove all static bars and regenerate step bar
     const barContainer = $(".step-bar");
-    barContainer.empty();
-    for (let i = 0; i < questions.length; i++) {
-        barContainer.append('<div class="bar"><div class="fill"></div></div>');
+    if (barContainer.length) {
+        barContainer.empty();
+        for (let i = 0; i < questions.length; i++) {
+            barContainer.append('<div class="bar"><div class="fill"></div></div>');
+        }
     }
 
     questions.forEach((q, idx) => {
@@ -124,12 +215,17 @@ function renderQuiz() {
                 </div>
             `;
         });
-        // Only show hint button if not the last question
+        // Always show hint button if there are hints remaining and a hint_text exists
         let hintBtn = '';
-        // Add badge for hint counter (will be updated dynamically)
-        if (q.hint_text && stepNum < questions.length) {
+        if (q.hint_text) {
+            // Use localized hint_label for the button text, and enforce presence
+            if (!resultStrings || !resultStrings[currentLang] || !resultStrings[currentLang].hint_label) {
+                console.error('Missing localized hint_label for language:', currentLang);
+                throw new Error('Missing localized hint_label for language: ' + currentLang);
+            }
+            let hintLabel = resultStrings[currentLang].hint_label;
             hintBtn = `<button type="button" class="hint-btn" data-hint-text="${q.hint_text.replace(/"/g, '&quot;')}" title="Show hint" style="position:relative;">
-                <span class="hint-badge"><i class="fa-solid fa-lightbulb"></i></span> Hint
+                <span class="hint-badge"><i class="fa-solid fa-lightbulb"></i></span> ${hintLabel}
                 <span class="hint-notification-badge">3</span>
             </button>`;
         }
@@ -286,11 +382,13 @@ function renderQuiz() {
 
 function countresult() {
     let correct = 0;
-    userAnswers = [];
+    // Do NOT reset window.userAnswers here; just read from it
     questions.forEach((q, idx) => {
         const stepNum = idx + 1;
+        // Get the selected value for this question
         const val = $(`#step${stepNum} .radio-field input:checked`).val();
-        userAnswers.push(val);
+        // Update window.userAnswers at the correct index
+        window.userAnswers[idx] = val;
         // Remove any previous icons and incorrect borders
         $(`#step${stepNum} .radio-field label .answer-icon`).empty();
         $(`#step${stepNum} .radio-field`).removeClass('incorrect');
@@ -367,14 +465,21 @@ $(document).ready(function() {
     $(document).on('click', '.hint-btn', function() {
         if (hintsRemaining <= 0) return;
         var text = $(this).attr('data-hint-text') || '';
-        // Remove the word "Hint:" (case-insensitive, with or without space or colon) from the start
-        text = text.replace(/^\s*hint\s*:?\s*/i, '');
-        // Append remaining hints info (do not decrease yet)
-        const hintFooter = `<div style=\"margin-top:18px;font-size:0.98rem;color:#666;text-align:center;\">You have ${hintsRemaining} hint${hintsRemaining === 1 ? '' : 's'} remaining</div>`;
+        // Remove the word "Hint:" or localized label (case-insensitive, with or without space or colon) from the start
+        let hintLabel = (resultStrings && resultStrings[currentLang] && resultStrings[currentLang].hint_label) ? resultStrings[currentLang].hint_label : 'Hint';
+        let hintLabelRegex = new RegExp('^\\s*' + hintLabel + '\\s*:?\\s*', 'i');
+        text = text.replace(hintLabelRegex, '');
+        // Show the modal with (notification count - 1) as the remaining hints
+        var hintsToShow = Math.max(hintsRemaining - 1, 0);
+        let hintWindowText = (resultStrings && resultStrings[currentLang] && resultStrings[currentLang].hint_window_text) ? resultStrings[currentLang].hint_window_text : 'Hints remaining';
+        // Japanese: e.g. "2 残るヒント", English: "2 Hints remaining"
+        const hintFooter = `<div style=\"margin-top:18px;font-size:0.98rem;color:#666;text-align:center;\">${hintsToShow} ${hintWindowText}</div>`;
         $('#hintModalBody').html(text + hintFooter);
         $('#hintModalOverlay').show();
-        // Store that a hint is open and should decrement on close
-        $('#hintModalOverlay').data('pendingHintDecrement', true);
+        // Only set pending decrement if not already open
+        if (!$('#hintModalOverlay').data('pendingHintDecrement')) {
+            $('#hintModalOverlay').data('pendingHintDecrement', true);
+        }
     });
     function closeHintModalAndDecrement() {
         $('#hintModalOverlay').hide();
@@ -430,10 +535,16 @@ $(document).ready(function() {
             updateStepBar(idx);
         }
     });
+
     $(document).on('click', '#sub', function() {
-        showresult();
+    $('.show-section.wrapper section').hide();
+    $(this).blur();
+    setTimeout(function() {
         countresult();
-    });
+        showresult(true); // pass true to indicate modal
+        showResultModal();
+    }, 100);
+});
 
     // INSTANT FEEDBACK: Show check/cross icon and red border immediately on answer selection
     $(document).on('change', 'input[type="radio"]', function() {
@@ -447,6 +558,31 @@ $(document).ready(function() {
         const formId = section.find('form').attr('id');
         const stepNum = parseInt(formId.replace('step', ''));
         const q = questions[stepNum - 1];
+        // --- Update global userAnswers array immediately on every answer selection ---
+        window.userAnswers[stepNum - 1] = $(this).val();
+
+        // --- Debug: Show current score in console and optionally on page ---
+        const debugCorrect = questions.filter((q, i) => String(window.userAnswers[i]) === String(q.correct)).length;
+        const debugTotal = questions.length;
+        console.log(`[DEBUG] Current score: ${debugCorrect} / ${debugTotal}`, window.userAnswers);
+        // Optionally, show live score in a fixed corner (uncomment to enable on page)
+        /*
+        if (!document.getElementById('liveScoreDebug')) {
+            const div = document.createElement('div');
+            div.id = 'liveScoreDebug';
+            div.style.position = 'fixed';
+            div.style.bottom = '16px';
+            div.style.right = '16px';
+            div.style.background = 'rgba(0,0,0,0.7)';
+            div.style.color = '#fff';
+            div.style.padding = '8px 16px';
+            div.style.borderRadius = '8px';
+            div.style.zIndex = 99999;
+            div.style.fontSize = '18px';
+            document.body.appendChild(div);
+        }
+        document.getElementById('liveScoreDebug').textContent = `Score: ${debugCorrect} / ${debugTotal}`;
+        */
         let isCorrect = false;
         let isWrong = false;
         let selectedInput = null;
@@ -471,7 +607,7 @@ $(document).ready(function() {
                 }
             }
         });
-        // If correct, auto-advance after a short delay (for animation)
+        // If correct, auto-advance after a short delay (for animation), but NOT on last question
         if (isCorrect && stepNum < questions.length) {
             setTimeout(function() {
                 section.hide();
@@ -570,4 +706,120 @@ $(document).ready(function() {
     $(document).ajaxStop(function() {
         $(document).trigger('quizRendered');
     });
+
+    // --- Result Modal Implementation ---
+function ensureResultModal() {
+    if (!document.getElementById('resultModalOverlay')) {
+        const modalHtml = `
+            <div id="resultModalOverlay" class="modal show" tabindex="-1" style="display: none; background: rgba(0,0,0,0.7); position: fixed; z-index: 9999; width: 100vw; height: 100vh; top: 0; left: 0;">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content p-4 text-center">
+                        <img src="assets/images/Primary_Pride Logo_Black.png" alt="Logo" style="max-width: 120px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
+                        <h2 class="result-title"></h2>
+                        <div class="result-answers" style="margin: 32px 0 10px 0;">
+                            <div class="result-row" style="display:flex;justify-content:center;gap:24px;align-items:center;">
+                                <div class="result-label" style="font-family:'matter-semibold';font-size:22px;"></div>
+                                <div class="result-value result-correct" style="font-family:'matter-semibold';font-size:22px;"></div>
+                            </div>
+                            <div class="result-row" style="display:flex;justify-content:center;gap:24px;align-items:center;margin-top:10px;">
+                                <div class="result-label" style="font-family:'matter-semibold';font-size:22px;"></div>
+                                <div class="result-value result-passing" style="font-family:'matter-semibold';font-size:22px;"></div>
+                            </div>
+                        </div>
+                        <div class="result_show">
+                            <div class="result-status" style="margin-top:10px;margin-bottom:10px;font-size:24px;font-family:'matter-semibold';"></div>
+                            <div class="result_msg" style="font-size:24px;font-family:'matter-semibold'; margin-bottom:18px;"></div>
+                            <div class="result_link"></div>
+                        </div>
+                        <button id="resultModalClose" class="btn btn-secondary mt-3">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+}
+function showResultModal() {
+    ensureResultModal();
+    $('#resultModalOverlay').show();
+    $('#resultModalClose').focus();
+}
+function hideResultModal() {
+    $('#resultModalOverlay').hide();
+}
+$(document).on('click', '#resultModalClose', function() {
+    hideResultModal();
+});
+$(document).on('click', '#resultModalOverlay', function(e) {
+    if (e.target === this) {
+        hideResultModal();
+    }
+});
+
+// Patch the submit handler to use the modal
+$(document).on('click', '#sub', function() {
+    $('.show-section.wrapper section').hide();
+    $(this).blur();
+    setTimeout(function() {
+        countresult();
+        showresult(true); // show in modal
+        showResultModal();
+    }, 100);
+});
+
+// Patch showresult to support modal
+window.showresult = function(modalMode) {
+    if (!resultStrings) {
+        $.ajax({
+            url: 'assets/js/result_strings.json',
+            dataType: 'json',
+            async: false,
+            success: function(data) { resultStrings = data; },
+            error: function() { resultStrings = null; }
+        });
+    }
+    if (window.selectedQuizLang) {
+        currentLang = window.selectedQuizLang;
+    } else if (typeof getCurrentQuizLang === 'function') {
+        currentLang = getCurrentQuizLang();
+    }
+    if (!resultStrings || !resultStrings[currentLang]) currentLang = 'en';
+    const strings = resultStrings[currentLang];
+
+    // Use modal or legacy result page
+    const $root = modalMode ? $('#resultModalOverlay') : $('.result_page');
+    $root.find('.result-title').text(strings.knowledge_check);
+    let correctNum = 0;
+    let totalNum = 0;
+    // Use the correct questions array for score calculation
+    if (typeof questions !== 'undefined' && Array.isArray(questions) && window.userAnswers) {
+        totalNum = questions.length;
+        correctNum = questions.filter((q, i) => String(window.userAnswers[i]) === String(q.correct)).length;
+        if (window.userAnswers.length < questions.length || window.userAnswers.includes(undefined)) {
+            console.warn('Some answers are missing or undefined:', window.userAnswers);
+        }
+    }
+    if (!totalNum) totalNum = 10;
+    if (typeof correctNum !== 'number' || isNaN(correctNum)) correctNum = 0;
+    const passingNum = 8;
+    $root.find('.result-label').eq(0).text(strings.your_score);
+    $root.find('.result-label').eq(1).text(strings.passing_score);
+    $root.find('.result-correct').text(`${correctNum} / ${totalNum}`);
+    $root.find('.result-passing').text(`${passingNum} / ${totalNum}`);
+    const isPass = correctNum >= passingNum;
+    const statusText = isPass ? strings.pass : strings.fail;
+    const msgText = isPass ? strings.pass_msg : strings.fail_msg;
+    $root.find('.result-status').text(statusText);
+    $root.find('.result_msg').text(msgText);
+    $root.find('.result_link').html(`<a href=\"${strings.link_url}\" target=\"_blank\" rel=\"noopener\" style=\"color:#0042ff;font-weight:bold;text-decoration:underline;\">${strings.link_url}</a>`);
+    if (!modalMode) {
+        $('.loadingresult').css('display', 'grid');
+        setTimeout(function() {
+            $('.result-correct')[0]?.offsetHeight;
+            $('.result-passing')[0]?.offsetHeight;
+            $('.result_page').addClass('result_page_show');
+        }, 1000);
+    }
+};
+
 });
