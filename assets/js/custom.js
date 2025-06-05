@@ -221,29 +221,5 @@ $(document).ready(function()
     })
 
     // check last step
-    $("#sub").on('click', function()
-    {
-        radiovalidate(5);
-
-        if(checkedradio == false)
-        {
-            
-        (function (el) {
-            setTimeout(function () {
-                el.children().remove('.reveal');
-            }, 3000);
-            }($('#error').append('<div class="reveal alert alert-danger">Choose an option!</div>')));
-            
-            radiovalidate(5);
-
-        }
-
-        else
-        {
-            countresult(5);
-            showresult();
-            $("#sub").html('done');
-
-        }
-    })
+    // (Removed #sub click handler to avoid conflict with result.js)
 })

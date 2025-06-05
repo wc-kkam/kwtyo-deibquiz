@@ -1,3 +1,6 @@
+body, html, .modal-content, .result-title, .result-label, .result-value, .result-status, .result_msg, .result_link, .result-answers, .result-row, .result_show, .result-correct, .result-passing, .result_page, .result_page * {
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif !important;
+}
 .loadingresult
 {
     position: absolute;
@@ -80,13 +83,50 @@
     height: 106%;
     z-index: -1;
 }
-.result_inner h2
-{
-    font-size: 42px;
-    font-family: "Sen";
+.result_inner h2, .result-title {
+    font-size: 32px;
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-weight: 900;
-    margin-bottom: 40px;
+    margin-bottom: 18px;
+    margin-top: 0;
+}
+.result-logo {
+    display: block;
+    margin: 0 auto 18px auto;
+    max-width: 120px;
+}
+.result-answers {
+    margin: 32px 0 10px 0;
+}
+.result-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    align-items: center;
+}
+.result-label {
+    font-family: 'matter-semibold';
+    font-size: 22px;
+}
+.result-value {
+    font-family: 'matter-semibold';
+    font-size: 22px;
+}
+.result-passing {
+    font-size: 18px;
+}
+.result-status {
+    margin-top: 18px;
+    margin-bottom: 10px;
+    font-size: 28px;
+    font-family: 'matter-semibold';
+}
+.result_msg {
+    margin-bottom: 18px;
+}
+.result_link {
+    margin-top: 10px;
 }
 .u_result,.p_result
 {
@@ -104,7 +144,7 @@
     height: 100%;
     min-width: 45%;
     font-size: 28px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-weight: 900;
     background-color: rgb(226, 226, 226);
@@ -127,7 +167,7 @@
     background-color: rgb(237, 237, 237);
     z-index: 9;
     font-size: 30px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-weight: 700;
     display: grid;
@@ -138,7 +178,7 @@
 .u_result span,.p_result span
 {
     font-size: 30px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-weight: 700;
     display: grid;
@@ -171,7 +211,7 @@
 .pass_check
 {
     font-size: 20px;
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     display: flex;
     align-items: center;
@@ -185,7 +225,7 @@
 }
 .result_msg
 {
-    font-family: "Sen";
+    font-family: 'matter-semibold', Arial, Helvetica, sans-serif;
     color: rgb(0, 0, 0);
     font-size: 25px;
     margin-top: 30px;

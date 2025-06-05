@@ -1,0 +1,30 @@
+{
+  "en": {
+    "knowledge_check": "Keywords Studios Quiz\nKnowledge Check",
+    "your_score": "Correct Answers:",
+    "passing_score": "Prize Awarded at:",
+    "points": "Answers",
+    "result": "Your Result",
+    "pass": "Congratulations!",
+    "fail": "Almost, why not try again!",
+    "pass_msg": "See our Team to get your Prize!",
+    "fail_msg": "Improve your score and get a gift. Also look out for the Hint button too!",
+    "link_url": "https://www.keywordsstudios.com/en/about-us/global-offer/responsible-business/people/",
+    "hint_label": "Hint",
+    "hint_window_text": "Hints remaining"
+  },
+  "ja": {
+    "knowledge_check": "キーワード スタジオクイズ\n知識チェック",
+    "your_score": "正解：",
+    "passing_score": "で受賞：",
+    "points": "回答",
+    "result": "結果",
+    "pass": "おめでとう！",
+    "fail": "もう少しだ！",
+    "pass_msg": "私たちのチームをご覧ください！",
+    "fail_msg": "スコアを伸ばしてプレゼントをもらおう。ヒントボタンにも注目！",
+    "link_url": "https://www.keywordsstudios.com/en/about-us/global-offer/responsible-business/people/",
+    "hint_label": "ヒント",
+    "hint_window_text": "残るヒント"
+  }
+}
