@@ -447,6 +447,7 @@ function countresult() {
 $(document).ready(function() {
     // Hints logic
     let hintsRemaining = 3;
+    let usedHints = [];
     function updateHintBadge() {
         $('.hint-notification-badge').text(hintsRemaining);
         if (hintsRemaining <= 0) {
@@ -455,31 +456,35 @@ $(document).ready(function() {
             $('.hint-btn').show();
         }
     }
-    // On quiz render, reset hints
+    // On quiz render, reset hints and usedHints
     $(document).on('quizRendered', function() {
         hintsRemaining = 3;
+        usedHints = [];
         updateHintBadge();
     });
 
     // Hint modal open/close logic
     $(document).on('click', '.hint-btn', function() {
         if (hintsRemaining <= 0) return;
+        // Determine the current question index
+        const $section = $(this).closest('section');
+        const currentIdx = $section.index();
+        // Only decrement and update badge the first time for this question
+        if (!usedHints.includes(currentIdx)) {
+            usedHints.push(currentIdx);
+            hintsRemaining--;
+            updateHintBadge();
+        }
+        // Show the hint modal as usual
         var text = $(this).attr('data-hint-text') || '';
-        // Remove the word "Hint:" or localized label (case-insensitive, with or without space or colon) from the start
         let hintLabel = (resultStrings && resultStrings[currentLang] && resultStrings[currentLang].hint_label) ? resultStrings[currentLang].hint_label : 'Hint';
-        let hintLabelRegex = new RegExp('^\\s*' + hintLabel + '\\s*:?\\s*', 'i');
+        let hintLabelRegex = new RegExp('^\s*' + hintLabel + '\s*:?\s*', 'i');
         text = text.replace(hintLabelRegex, '');
-        // Show the modal with (notification count - 1) as the remaining hints
-        var hintsToShow = Math.max(hintsRemaining - 1, 0);
+        var hintsToShow = Math.max(hintsRemaining, 0);
         let hintWindowText = (resultStrings && resultStrings[currentLang] && resultStrings[currentLang].hint_window_text) ? resultStrings[currentLang].hint_window_text : 'Hints remaining';
-        // Japanese: e.g. "2 残るヒント", English: "2 Hints remaining"
         const hintFooter = `<div style=\"margin-top:18px;font-size:0.98rem;color:#666;text-align:center;\">${hintsToShow} ${hintWindowText}</div>`;
         $('#hintModalBody').html(text + hintFooter);
         $('#hintModalOverlay').show();
-        // Only set pending decrement if not already open
-        if (!$('#hintModalOverlay').data('pendingHintDecrement')) {
-            $('#hintModalOverlay').data('pendingHintDecrement', true);
-        }
     });
     function closeHintModalAndDecrement() {
         $('#hintModalOverlay').hide();
