@@ -14,17 +14,17 @@
     "hint_window_text": "Hints remaining"
   },
   "ja": {
-    "knowledge_check": "キーワード スタジオクイズ\n知識チェック",
+    "knowledge_check": "キーワーズスタジオクイズ\n知識確認",
     "your_score": "正解：",
-    "passing_score": "で受賞：",
+    "passing_score": "受賞",
     "points": "回答",
-    "result": "結果",
-    "pass": "おめでとう！",
-    "fail": "もう少しだ！",
-    "pass_msg": "私たちのチームをご覧ください！",
-    "fail_msg": "スコアを伸ばしてプレゼントをもらおう。ヒントボタンにも注目！",
+    "result": "あなたの結果",
+    "pass": "おめでとうございます！",
+    "fail": "景品獲得までもう少し！もう一度挑戦してみませんか？",
+    "pass_msg": "ブースで景品をお受け取りください！",
+    "fail_msg": "スコアを上げて景品をもらいましょう！ヒントボタンにも注目！",
     "link_url": "https://www.keywordsstudios.com/en/about-us/global-offer/responsible-business/people/",
-    "hint_label": "ヒント",
-    "hint_window_text": "残るヒント"
+    "hint_label": "ヒント", 
+    "hint_window_text": "残りのヒント"
   }
 }

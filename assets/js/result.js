@@ -7,7 +7,7 @@ function showresult(modalMode) {
     // Load result strings if not already loaded
     if (!resultStrings) {
         $.ajax({
-            url: 'assets/js/result_strings.json?v=4',
+            url: 'assets/js/result_strings.json?v=5',
             dataType: 'json',
             async: false,
             success: function (data) { resultStrings = data; },
@@ -446,6 +446,7 @@ function countresult() {
 $(document).ready(function () {
     // Hints logic
     let hintsRemaining = 3;
+    let usedHints = [];
     function updateHintBadge() {
         $('.hint-notification-badge').text(hintsRemaining);
         if (hintsRemaining <= 0) {
@@ -454,31 +455,35 @@ $(document).ready(function () {
             $('.hint-btn').show();
         }
     }
-    // On quiz render, reset hints
+    // On quiz render, reset hints and usedHints
     $(document).on('quizRendered', function () {
         hintsRemaining = 3;
+        usedHints = [];
         updateHintBadge();
     });
 
     // Hint modal open/close logic
     $(document).on('click', '.hint-btn', function () {
         if (hintsRemaining <= 0) return;
+        // Determine the current question index
+        const $section = $(this).closest('section');
+        const currentIdx = $section.index();
+        // Only decrement and update badge the first time for this question
+        if (!usedHints.includes(currentIdx)) {
+            usedHints.push(currentIdx);
+            hintsRemaining--;
+            updateHintBadge();
+        }
+        // Show the hint modal as usual
         var text = $(this).attr('data-hint-text') || '';
-        // Remove the word "Hint:" or localized label (case-insensitive, with or without space or colon) from the start
         let hintLabel = (resultStrings && resultStrings[currentLang] && resultStrings[currentLang].hint_label) ? resultStrings[currentLang].hint_label : 'Hint';
-        let hintLabelRegex = new RegExp('^\\s*' + hintLabel + '\\s*:?\\s*', 'i');
+        let hintLabelRegex = new RegExp('^\s*' + hintLabel + '\s*:?\s*', 'i');
         text = text.replace(hintLabelRegex, '');
-        // Show the modal with (notification count - 1) as the remaining hints
-        var hintsToShow = Math.max(hintsRemaining - 1, 0);
+        var hintsToShow = Math.max(hintsRemaining, 0);
         let hintWindowText = (resultStrings && resultStrings[currentLang] && resultStrings[currentLang].hint_window_text) ? resultStrings[currentLang].hint_window_text : 'Hints remaining';
-        // Japanese: e.g. "2 残るヒント", English: "2 Hints remaining"
         const hintFooter = `<div style=\"margin-top:18px;font-size:0.98rem;color:#666;text-align:center;\">${hintsToShow} ${hintWindowText}</div>`;
         $('#hintModalBody').html(text + hintFooter);
         $('#hintModalOverlay').show();
-        // Only set pending decrement if not already open
-        if (!$('#hintModalOverlay').data('pendingHintDecrement')) {
-            $('#hintModalOverlay').data('pendingHintDecrement', true);
-        }
     });
     function closeHintModalAndDecrement() {
         $('#hintModalOverlay').hide();
@@ -710,27 +715,26 @@ $(document).ready(function () {
     function ensureResultModal() {
         if (!document.getElementById('resultModalOverlay')) {
             const modalHtml = `
-            <div id="resultModalOverlay" class="modal show" tabindex="-1" style="display: none; background: rgba(0,0,0,0.7); position: fixed; z-index: 9999; width: 100vw; height: 100vh; top: 0; left: 0;">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content p-4 text-center">
-                        <img src="assets/images/Primary_Pride Logo_Black.png" alt="Logo" style="max-width: 120px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
-                        <h2 class="result-title"></h2>
-                        <div class="result-answers" style="margin: 32px 0 10px 0;">
-                            <div class="result-row" style="display:flex;justify-content:center;gap:24px;align-items:center;">
-                                <div class="result-label" style="font-family:'matter-semibold';font-size:22px;"></div>
-                                <div class="result-value result-correct" style="font-family:'matter-semibold';font-size:22px;"></div>
+            <div id="resultModalOverlay" class="modal show" tabindex="-1" style="display: none; background: rgba(255,255,255,0.95); position: fixed; z-index: 9999; width: 100vw; height: 100vh; top: 0; left: 0;">
+                <div class="modal-dialog modal-dialog-centered" style="max-width: 440px; width: 98vw;">
+                    <div class="modal-content p-4 text-center" style="border-radius: 22px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); background: #fff; border: 3px solid #222;">
+                        <img src="assets/images/Primary_Pride Logo_Black.png" alt="Logo" style="max-width: 90px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
+                        <h2 class="result-title" style="font-family:'matter-semibold';font-size:2rem;line-height:1.2;margin-bottom:18px;"></h2>
+                        <div class="result-answers" style="margin: 18px 0 10px 0;">
+                            <div class="result-row" style="display:flex;justify-content:center;gap:18px;align-items:center;">
+                                <div class="result-label" style="font-family:'matter-semibold';font-size:1.2rem;"></div>
+                                <div class="result-value result-correct" style="font-family:'matter-semibold';font-size:1.2rem;"></div>
                             </div>
-                            <div class="result-row" style="display:flex;justify-content:center;gap:24px;align-items:center;margin-top:10px;">
-                                <div class="result-label" style="font-family:'matter-semibold';font-size:22px;"></div>
-                                <div class="result-value result-passing" style="font-family:'matter-semibold';font-size:22px;"></div>
+                            <div class="result-row" style="display:flex;justify-content:center;gap:18px;align-items:center;margin-top:8px;">
+                                <div class="result-label" style="font-family:'matter-semibold';font-size:1.1rem;"></div>
+                                <div class="result-value result-passing" style="font-family:'matter-semibold';font-size:1.1rem;"></div>
                             </div>
                         </div>
-                        <div class="result_show">
-                            <div class="result-status" style="margin-top:10px;margin-bottom:10px;font-size:24px;font-family:'matter-semibold';"></div>
-                            <div class="result_msg" style="font-size:24px;font-family:'matter-semibold'; margin-bottom:18px;"></div>
-                            <div class="result_link"></div>
-                        </div>
-                        <button id="resultModalClose" class="btn btn-secondary mt-3">Close</button>
+                        <div class="result-status" style="margin-top:18px;margin-bottom:10px;font-size:1.5rem;font-family:'matter-semibold';"></div>
+                        <div class="result_msg" style="font-size:1.1rem;font-family:'matter-semibold'; margin-bottom:18px;"></div>
+                        <img src="assets/images/End-of-Survey.png" alt="Celebrate Pride" style="max-width: 180px; margin: 0 auto 18px auto; display: block;">
+                        <div class="result_link" style="margin-bottom:10px;"></div>
+                        <button id="resultModalRetry" class="btn btn-secondary mt-3 d-block mx-auto" style="width:100%;max-width:340px;font-size:1.1rem;padding:10px 0;border-radius:8px;">Retry</button>
                     </div>
                 </div>
             </div>
@@ -741,13 +745,14 @@ $(document).ready(function () {
     function showResultModal() {
         ensureResultModal();
         $('#resultModalOverlay').show();
-        $('#resultModalClose').focus();
+        $('#resultModalRetry').focus();
     }
     function hideResultModal() {
         $('#resultModalOverlay').hide();
     }
-    $(document).on('click', '#resultModalClose', function () {
-        hideResultModal();
+    $(document).on('click', '#resultModalRetry', function () {
+        // Reload the index page
+        window.location.href = 'index.html';
     });
     $(document).on('click', '#resultModalOverlay', function (e) {
         if (e.target === this) {
