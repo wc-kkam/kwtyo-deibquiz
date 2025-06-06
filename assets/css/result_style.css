@@ -230,8 +230,10 @@ body, html, .modal-content, .result-title, .result-label, .result-value, .result
     font-size: 25px;
     margin-top: 30px;
 }
-
-
+.step-bar {
+    display: flex;
+    gap: 8px; /* Adjust to 8px if you prefer */
+}
 
 
 
